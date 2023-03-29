@@ -450,7 +450,23 @@ class health(delegate.page):
         web.header('Content-Type', 'text/plain')
         return web.ok('OK')
 
+class author_isbn_lookup(delegate.page):
+    """Redirects to the first author's image"""
+    # https://openlibrary.org/isbn/0262045354.json
+    path = r'/(?:isbn|ISBN)/([0-9xX-]+)/authors/([0-9]+)/img'
 
+    def GET(self, isbn, author_i=0):
+        #try:
+        i = web.input(size="M")
+        author_i = int(author_i)
+        if ed := Edition.from_isbn(isbn, retry=True):
+            if ed.authors and len(ed.authors) > author_i:
+                author_id = ed.authors[author_i].key.split('/')[-1]
+                raise web.seeother(f'https://covers.openlibrary.org/a/olid/{author_id}-{i.size}.jpg')
+        #except Exception as e:
+        #    logger.error(e)
+        #    return repr(e)
+    
 class isbn_lookup(delegate.page):
     path = r'/(?:isbn|ISBN)/([0-9xX-]+)'
 

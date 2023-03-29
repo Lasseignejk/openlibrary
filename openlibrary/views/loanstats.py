@@ -1,6 +1,7 @@
 """Loan Stats"""
 
 import web
+import requests
 from infogami.utils import delegate
 from ..core.lending import get_availabilities
 
@@ -139,9 +140,16 @@ def get_cached_reading_log_stats(limit):
 class stats(app.view):
     path = "/stats"
 
+    @staticmethod
+    def count_ebooks():
+        return requests.get(
+            f"{web.ctx.path}/search.json?q=ebook_access:[borrowable%20TO%20*]"
+        ).json.get("num_found")
+    
     def GET(self):
         counts = get_counts()
         counts.reading_log = cached_reading_log_summary()
+        counts.ebooks = self.count_ebooks()
         return app.render_template("admin/index", counts)
 
 
