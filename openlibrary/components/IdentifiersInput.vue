@@ -1,107 +1,60 @@
 <template>
-  <table class="identifiers">
-    <tr id="identifiers-form">
-      <th>
-        <select
-          v-model="selectedIdentifier"
-          class="form-control"
-          name="name"
-        >
-          <option
-            disabled
-            value=""
-          >
-            Select one
+  <!-- formerly table -->
+  <div class="identifiers wrapper">
+  <!-- Top row form -->
+  <div id="identifiers-form" class="identifiers-table">
+
+      <select v-model="selectedIdentifier" class="form-control cell1" name="name">
+        <option disabled value="">Select one</option>
+        <template v-if="hasPopularIds">
+          <option v-for="entry in popularIds" :key="entry.name" :value="entry.name">
+            {{ entry.label }}
           </option>
-          <template v-if="hasPopularIds">
-            <option
-              v-for="entry in popularIds"
-              :key="entry.name"
-              :value="entry.name"
-            >
-              {{ entry.label }}
-            </option>
-            <option
-              disabled
-              value=""
-            >
-              ---
-            </option>
-          </template>
-          <option
-            v-for="idConfig in identifierConfigsByKey"
-            :key="idConfig.name"
-            :value="idConfig.name"
-          >
-            {{ idConfig.label }}
-          </option>
-        </select>
-      </th>
-      <th>
-        <input
-          id="id-value"
-          v-model.trim="inputValue"
-          class="form-control"
-          type="text"
-          name="value"
-          @keyup.enter="setIdentifier"
-        >
-      </th>
-      <th>
-        <button
-          class="form-control"
-          name="set"
-          :disabled="!setButtonEnabled"
-          @click="setIdentifier"
-        >
-          Set
-        </button>
-      </th>
-    </tr>
-    <template v-for="(value, name) in assignedIdentifiers">
-      <tr
-        v-if="value && !saveIdentifiersAsList"
-        :key="name"
+          <option disabled value="">---</option>
+        </template>
+        <option v-for="idConfig in identifierConfigsByKey" :key="idConfig.name" :value="idConfig.name">
+          {{ idConfig.label }}
+        </option>
+      </select>
+
+    <div class="cell2">
+      <input
+        id="id-value"
+        v-model.trim="inputValue"
+        class="form-control"
+        type="text"
+        name="value"
+        @keyup.enter="setIdentifier"
       >
-        <td>{{ identifierConfigsByKey[name]?.label ?? name }}</td>
-        <td>{{ value }}</td>
-        <td>
-          <button
-            class="form-control"
-            @click="removeIdentifier(name)"
-          >
-            Remove
-          </button>
-        </td>
-      </tr>
-      <template v-else-if="value && saveIdentifiersAsList">
-        <tr
-          v-for="(item, idx) in value"
-          :key="name + idx"
-        >
-          <td>{{ identifierConfigsByKey[name]?.label ?? name }}</td>
-          <td>{{ item }}</td>
-          <td v-if="!isAdmin">
-            <button
-              v-if="name !== 'ocaid'"
-              class="form-control"
-              @click="removeIdentifier(name, idx)"
-            >
-              Remove
-            </button>
-          </td>
-          <td v-else>
-            <button
-              class="form-control"
-              @click="removeIdentifier(name, idx)"
-            >
-              Remove
-            </button>
-          </td>
-        </tr>
-      </template>
-    </template>
-  </table>
+    </div>
+    <div class="cell3">
+      <button class="form-control" name="set" :disabled="!setButtonEnabled" @click="setIdentifier">
+        Set
+      </button>
+    </div>
+  </div>
+
+  <!-- Bottom assigned identifiers -->
+  <div v-for="(value, name) in assignedIdentifiers" :key="name">
+    <div v-if="value && !saveIdentifiersAsList" class="assigned-identifiers-table">
+      <div class="identifier-name">{{ identifierConfigsByKey[name]?.label ?? name }}</div>
+      <div class="identifier-value">{{ value }}</div>
+      <div class="remove-button">
+        <button class="form-control" @click="removeIdentifier(name)">Remove</button>
+      </div>
+    </div>
+
+    <div v-else-if="value && saveIdentifiersAsList">
+      <div v-for="(item, idx) in value" :key="name + idx" class="assigned-identifiers-table">
+        <div class="identifier-name">{{ identifierConfigsByKey[name]?.label ?? name }}</div>
+        <div class="identifier-value">{{ item }}</div>
+        <div class="remove-button">
+          <button class="form-control" @click="removeIdentifier(name, idx)">Remove</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 </template>
 
 <script>
@@ -318,25 +271,69 @@ export default {
 <style lang="less">
 // This and .form-control ensure that select, input, and buttons are the same height
 select.form-control {
-  height: calc(2.25rem + 2px);
+  height: calc(2.25rem + 2px); 
+}
+.wrapper {
+  display: inline-block;
+  background-color: #f6f5ee;
+  padding: .25rem;
+}
+.identifiers-table {
+  display: grid;
+  grid-template-columns: auto auto auto;
+  gap: 4px;
+}
+.cell3 {
+  justify-self: end;
+  border: 1px solid red;
+}
+// 8922d19e85444bbb7b0adfb7153dc0fa
+// 9780545139700
+// orgullo-y-prejuicio-vol-2-by-jane-austen
+// Oxford University Bodleian Library Aleph System Number
+.assigned-identifiers-table {
+  display: grid;
+  grid-template-columns: 60% auto auto; 
+  // grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) auto; 
+  gap: 4px;
+  align-items: center;
+  margin-top: 4px;
+  border-top: 1px solid #ddd;
+  padding: .25rem 0;
+}
+.identifier-value, .identifier-name {
+  white-space: normal;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  min-width: 0;
+}
+.remove-button {
+  justify-self: end;
+}
+@media (max-width: 855px) {
+  .identifiers-table {
+    grid-template-columns: 1fr auto;
+    grid-template-areas: 
+      "cell1 cell1"
+      "cell2 cell3";
+  }
+  .cell1 { grid-area: cell1; }
+  .cell2 { grid-area: cell2; }
+  .cell3 { grid-area: cell3; }
+  .assigned-identifiers-table {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas: 
+      "identifier-name remove-button"
+      "identifier-value remove-button";
+  }
+  .identifier-name { grid-area: identifier-name; }
+  .identifier-value { grid-area: identifier-value; }
+  .remove-button { grid-area: remove-button; }
 }
 .form-control {
   padding: .375rem .75rem;
   font-size: 1rem;
   line-height: 1.5;
   border: 1px solid #ced4da;
-}
-table {
-  background-color: #f6f5ee;
-  border-collapse: collapse;
-}
-th {
-  text-align: left;
-}
-td {
-  border-top: 1px solid #ddd;
-}
-th, td {
-  padding: .25rem;
 }
 </style>
