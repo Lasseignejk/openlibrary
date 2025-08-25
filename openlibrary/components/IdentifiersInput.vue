@@ -285,7 +285,6 @@ select.form-control {
 }
 .cell3 {
   justify-self: end;
-  border: 1px solid red;
 }
 // 8922d19e85444bbb7b0adfb7153dc0fa
 // 9780545139700
@@ -310,6 +309,7 @@ select.form-control {
 .remove-button {
   justify-self: end;
 }
+// The <select> element will cause the IdentifiersInput area to expand past its boundaries at around 850px which is why the media query targets 855px and not the standard tablet breakpoint of 768.
 @media (max-width: 855px) {
   .identifiers-table {
     grid-template-columns: 1fr auto;
@@ -326,7 +326,7 @@ select.form-control {
       "identifier-name remove-button"
       "identifier-value remove-button";
   }
-  .identifier-name { grid-area: identifier-name; }
+  .identifier-name { grid-area: identifier-name; font-weight: bold; }
   .identifier-value { grid-area: identifier-value; }
   .remove-button { grid-area: remove-button; }
 }
